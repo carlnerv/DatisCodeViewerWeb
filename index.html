@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!-- 将该index.html放到Voice.ini文件同目录 -->
+<!-- IIS开启静态内容功能，添加MIME类型.ini为text/plain -->
+<!-- 访问该index.html即可查看通播内容 -->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>通播内容</title>
+    <!-- <link href="styles/style.css" rel="stylesheet"> -->
+	<!-- <script src="scripts/main.js" defer></script> -->
+	<style>
+	
+body {
+	width: 90%;
+	margin: 2em auto;
+	/* font: .9em/1.2 Arial, Helvetica, sans-serif; */
+}
+
+.container {
+	display: grid;
+	grid-template-columns: 1fr 3fr;
+	grid-gap: 10px;
+}
+
+.article {
+	grid-column: 2;
+	grid-row: 2 / 4;
+	border: 2px solid;
+	padding: 10px;
+}
+
+#article {
+	font-size: 200%;
+}
+
+.code {
+	grid-column: 1;
+	grid-row: 2;
+	border: 2px solid;
+	padding: 10px;
+	
+}
+
+#code {
+	text-align: center;
+	font-size: 1500%;
+	font-weight: bold;
+}
+
+.rwy {
+	grid-column: 1;
+	grid-row: 3;
+	border: 2px solid;
+	padding: 10px;
+	
+}
+
+#rwy {
+	text-align: center;
+	font-size: 1500%;
+}
+
+
+	</style>
+	<script>
+	
+// get text
+async function fetchText() {
+    let response = await fetch('Voice.ini', {cache: "no-store"});
+    let responseText = await response.text();
+
+    fillPage(responseText);
+}
+
+(async() => {
+    await fetchText();
+})();
+
+function fillPage(txt) {
+	document.getElementById('article').innerText = txt;
+	let datisStringIndex = txt.search('通播') + 2;
+	let rwyStringIndex = txt.search('跑道') + 2;
+	let datisCode = txt.substring(datisStringIndex,datisStringIndex+1);
+	let rwyCode = txt.substring(rwyStringIndex,rwyStringIndex+2);
+	
+	document.getElementById('code').innerText = datisCode;
+	document.getElementById('rwy').innerText = rwyCode;
+	
+	let datisTimeIndex = txt.search('协调时 ') + 4;
+	let datisHour = Number(txt.substring(datisTimeIndex,datisTimeIndex+2));
+	let datisMinute = Number(txt.substring(datisTimeIndex+3,datisTimeIndex+5));
+	let curHour = new Date().getHours();
+	let curMinute = new Date().getMinutes();
+	
+	if (curHour < datisHour) curHour += 24;
+	let dur = ( curHour * 60 + curMinute ) - ( datisHour * 60 + datisMinute );
+	if (dur < 65) {
+		document.getElementById('code').style.color = 'green';
+	} else {
+		document.getElementById('code').style.color = 'red';
+	}
+	
+}
+
+setInterval(fetchText, 5000);
+
+	</script>
+  </head>
+  <body>
+    <div class="container">
+	  <div class="article"><label>通播内容</label><div id="article"></div></div>
+	  <div class="code"><label>通播代码</label><div id="code"></div></div>
+	  <div class="rwy"><label>跑道号</label><div id="rwy"></div></div>
+	</div>
+  </body>
+</html>
