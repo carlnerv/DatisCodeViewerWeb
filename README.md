@@ -3,5 +3,7 @@
 
 # 用法
 将该index.html放到Voice.ini文件同目录
+
 IIS开启静态内容功能，添加MIME类型.ini为text/plain
+
 访问该index.html即可查看通播内容
